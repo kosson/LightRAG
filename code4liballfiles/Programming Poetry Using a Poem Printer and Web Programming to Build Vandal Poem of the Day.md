@@ -1,0 +1,211 @@
+---
+title: "Programming Poetry: Using a Poem Printer and Web Programming to Build Vandal Poem of the Day"
+source: "https://journal.code4lib.org/articles/14575"
+author:
+  - "[[The Code4Lib Journal]]"
+published: 2019-08-09
+created: 2025-01-10
+description: "Vandal Poem of the Day (VPOD) is a public poetry initiative led by the Center for Digital Inquiry and Learning (CDIL) at the University of Idaho Library. For four academic years VPOD has published contemporary poems daily in collaboration with award-winning poetry presses and journals. This article details the project's genesis and history, focusing on [...]"
+tags:
+  - "clippings"
+---
+# Programming Poetry: Using a Poem Printer and Web Programming to Build Vandal Poem of the Day
+Evan Williamson, Devin Becker
+
+Vandal Poem of the Day (VPOD) is a public poetry initiative led by the Center for Digital Inquiry and Learning (CDIL) at the University of Idaho Library. For four academic years VPOD has published contemporary poems daily in collaboration with award-winning poetry presses and journals. This article details the project’s genesis and history, focusing on two aspects of the project: 1) the customized WordPress site, CSS, and plugins that enable the layout, publication, and social media promotion of the poetry and 2) the innovative means we have developed for promoting the site using receipt printers. The latter portion includes details and code related to two different physical computing projects that use receipt printers–one using a Raspberry Pi and the other using a recycled library circulation printer– to print individual VPOD poems on demand.
+
+## Introduction
+
+The Vandal Poem of the Day (VPOD) is a public poetry project based at the University of Idaho Library bringing contemporary poems to the campus community and beyond. The project began with a conversation between poets Devin Becker and Keetje Kuipers (both winners of the A. Poulin, Jr. Poetry Prize) during the 2015 [Association for the Study of Literature and the Environment](https://www.asle.org/) (ASLE) conference held in Moscow, Idaho. Kuipers established Aubie’s Poem of the Day at Auburn University \[[1](https://journal.code4lib.org/articles/#note1)\] in 2014 and asked if there would be interest in replicating the project at the University of Idaho. Aubie’s Poem of the Day used a WordPress site to publish one contemporary poem per day from a prominent poetry press, featuring Copper Canyon Press (2014/15) and BOA Editions LTD (2015/16) during the project’s two years. Kuipers worked with librarian Jaena Alabi to setup the project using library server space and resources. Knowing that Becker was a digital librarian in addition to being a poet, she thought the model would be a good fit for the University of Idaho.
+
+Becker worked with colleague Alexandra Teague, a poet and University of Idaho English faculty, to write a proposal for the VPOD project, securing grant funding from the Idaho Humanities Council (IHC) and a match from the university’s College of Letters, Arts, and Social Sciences (CLASS) \[[2](https://journal.code4lib.org/articles/#note2)\]. The funding from CLASS and the IHC supported marketing materials for outreach and a visit for a featured poet to read as part of the first year’s events. University of Idaho Library provided technical support, as Becker and librarian Evan Williamson setup the VPOD web site and workflows to facilitate the publication of the poems.
+
+Many of the initial hurdles for establishing the project were already overcome by Kuipers. She had worked with the presses to collect the featured poems for the first two years \[[3](https://journal.code4lib.org/articles/#note3)\] and to receive permission to reprint the poems on a website \[[4](https://journal.code4lib.org/articles/#note4)\]. Thus, once Becker worked with The Permissions Company, Inc. to update the permissions agreement, VPOD had a trove of content (poems) and metadata (poet’s name, book in which the poem appeared, etc.) already selected for publication on the new site.
+
+## WordPress Site and Collaborative Workflow Setup
+
+### Poems Published as JPG vs. Poems Published as Text
+
+Aubie’s Poem of the Day published each poem as a JPG image, stored as media files on their WordPress instance. This has been a common practice for the online publication of poetry during most of the 21st century for at least two reasons: 1) The poems were less easily copied and pasted and as such, plagiarism and copyright infringement were thought to be limited; 2) The image of the poem preserved the font and layout of its original publication. Publishing the poems as images also evades the complex and interpretive work necessary to mark up the poems to display correctly in HTML.
+
+Additionally, Kuipers and Alabi were invested in the use of QR codes for promotion and access to the site. They were hopeful that many of their users would be arriving at the site via their phones, and Kuipers was particularly invested in maintaining the fidelity of the line breaks of the poems. So she and Alabi decided, quite understandably, that delivering the poems as images rather than text would be the best option going forward.
+
+![Figure 1](https://journal.code4lib.org/media/issue45/williamson/1.jpg)
+
+**Figure 1.** FC.D. Wright’s poem “Gift of the Book” as featured in Aubie’s Poem of the Day (left) and Vandal Poem of the Day (right) ([enlarge](https://journal.code4lib.org/media/issue45/williamson/1_large.jpg))
+
+After reviewing the content, Becker and Williamson decided to break with that convention and publish the poems in a text based workflow. Locking the poems in image format presented a variety of limitations that VPOD hoped to avoid. First, depending on screen size, the images often appeared pixelated or uncrisp, delivering the poems in a slightly unclear way and reducing the readability (see figure 1). Second, the images were not necessarily mobile friendly because some of the aspect ratios did not scale well to the wide variety of screen sizes that modern websites seek to support. Third, images of text are not accessible to screen readers and other tools used by people with disabilities unless they contain a full transcript as “alt” attribute. Finally, Becker and Williamson intended to re-use the poems’ text outside of the website itself to explore opportunities for outreach and analysis, thus clean marked up text would enable new possibilities beyond the image files.
+
+The poems were provided as PDF files with each filename containing the author name, book title, and poem title, with the poem image as a single page. To create plain text, the image PDFs were OCRed using Adobe Acrobat batch processing and the text was extracted using “pdftotext” from Xpdf tools \[[5](https://journal.code4lib.org/articles/#note5)\]. With the poem’s lines in plain text files, Williamson developed a series of batch operations to streamline preparation of the text as far as is possible before loading into WordPress and handing off to editors. To set up the basic HTML markup that would represent the lines of poetry on the web, a series of find and replace operations enclosed each line of poetry in <p class=”line”></p>, and replaced blank lines with an empty paragraph ( <p></p> ). Next, a script extracted the author name and book title from the filename, and wrote a “by line” at the top and a “bookinfo” line at the bottom of each file. This batch of files was then combined into a single XML file following the format used to migrate WordPress sites \[[6](https://journal.code4lib.org/articles/#note6)\]. Each poem was assembled as a draft post, with <title>, and the prepared text data inserted in the <content:encoded> element. This file was then imported into the WordPress site, automatically inserting each poem as a draft post \[[7](https://journal.code4lib.org/articles/#note7)\].
+
+The basic setup of VPOD is that each poem is a WordPress “Post”, with the author’s name as a “Category”, providing a data set that can be iterated over and sorted in a variety of ways to provide access. WordPress “Pages” are used to provide contextual means to enter the data, i.e. via the featured poets. Each poem’s post provides links to the author’s bio, other VPOD poems, the book from the publisher, and related books in the University of Idaho Library collection.
+
+Using WordPress’s role management features, each post/poem was assigned to an editor involved in the project to review and polish. Each editor checked the OCR text against the original poem image and carefully added markup to represent the original layout of the lines. Editors used the “code view” to work on each poem, as the “visual editor” breaks the manual layout by adding extra markup. Since many of the editors had no previous experience with HTML, some found looking at the poems in this way to be intimidating. However, it became an opportunity to learn markup concepts using a very small subset of tags (just <p> with different classes) while deeply engaging with the text and reflecting about representation of poetry from the print book, to images, to digital screens.
+
+### WordPress Setup and Poem Layout
+
+With the poems transformed into viable text data and loaded into the system, Becker worked on setting up the WordPress instance to automate delivering the daily poems while minimizing regular maintenance. First, Becker looked for a WordPress theme that could be customized to provide the desired functionality and presentation. VPOD needed a minimal look and feel, free of distracting designs so that the poem of the day would be the site’s central feature. Becker searched for a theme that would be able to deliver those requirements and discovered the [Founder](https://wordpress.org/themes/founder/) theme by Ben Sibley, [creating a child theme](https://codex.wordpress.org/Child_Themes#Creating_a_Child_Theme_from_an_Unmodified_Parent_Theme) from that theme in order to maintain his customizations.
+
+VPOD also needed to account for linking between the poems, the books that the poems came from, the press’s site, and the biographies of the poets who wrote the poems. This was accomplished by creating a page of biographies with anchors for direct links, creating WordPress “categories” for the authors collecting all poems written by each author, and creating WordPress “tags” for the poems indicating the author’s name and Twitter handle (if it exists). The information included in each poem’s tags can be used by plugins to generate further links–for example, in the automatic tweet sent when a new poem is published by the plugin [WP to Twitter](https://wordpress.org/plugins/wp-to-twitter/).
+
+WordPress’s famous plugin ecosystem provided many out-of-the-box solutions that were easily configured to the VPOD’s needs. However, creating the site’s front page required some lower-level PHP customization. Becker tweaked the index page PHP function to display a single post on the front page that then led, via a “Read More Poems!” link, to an archive of all the posts that are categorized as “poems.” The archive required an offset that allowed the typical WordPress PHP functions to be slightly adjusted so that the first poem in the “poems” archive wouldn’t appear (as it would already be on the front page) and the pagination would then be adjusted going forward by one post. Without this last adjustment, poems/posts would repeat when users went to the next page of poems/posts in the archive.
+
+| 1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41 | `function` `special_home_pagesize( ``$query` `) {`  `if` `( is_admin() \|\| ! ``$query``->is_main_query() )`  `return``;`  `if` `( is_home() ) {`  `$query``->set( ``'posts_per_page'``, 1 );`  `return``;`  `}`  `if` `( is_category( ``'Poems'` `) ) {`  `$offset` `= 1;`  `$ppp` `= get_option(``'posts_per_page'``);`  `if` `( ``$query``->is_paged ) {`  `$page_offset` `= ``$offset` `+ ( (``$query``->query_vars[``'paged'``]-1) * ``$ppp` `);`  `$query``->set(``'offset'``, ``$page_offset` `);`  `}`  `else` `{`  `$query``->set(``'offset'``,``$offset``);`  `}`  `return``;`  `}`  `}`  `add_action( ``'pre_get_posts'``, ``'special_home_pagesize'` `);` |
+| --- | --- | --- | --- |
+
+This code was taken from one of the [supporting documents on WordPress’s site itself](https://codex.wordpress.org/Making_Custom_Queries_using_Offset_and_Pagination), highlighting another benefit of WordPress: the excellent documentation and community forums that proved immensely helpful for understanding how and where to deploy bits of PHP to make the site function as desired. So many of the world’s websites are published using WordPress that finding code and plugins to incorporate is often just a well-phrased Google search away.
+
+As opposed to the WordPress instance, the workflows and markup required to properly publish the poems did provide some unique challenges for the project, namely how to get the poems to read well on screen while maintaining some indication regarding the line and stanza structure, and how to incorporate non-technical staff and student workers into the workflow for marking up and uploading individual poems. The former problem took a small amount of CSS to accomplish. We code all lines of each poem as a <p class=”line”> so that each line follows these style constraints:
+
+| 1  2  3  4  5  6 | `.line {`  `text-indent``: ``-32px``;`  `margin``: ``0` `0` `0` `32px``;`  `padding-right``: ``16px``;`  `line-height``: ``28px``;`  `}` |
+| --- | --- |
+
+The “-32px text indent combined with a left-margin of 32px enable a hanging indent effect when a line breaks due to the size of the screen in which it’s held. This hanging indent method is a traditional approach to formatting poetry within long lines on a page so that a reader can still observe where each line begins and ends. This convention is especially prevalent in great book series and other similar collections that gather a variety of poetry into smaller-paged books. This problem of breaking lines in a way that still communicates the author’s intended breaks is also difficult for contemporary poetry presses and publishers \[[8](https://journal.code4lib.org/articles/#note8)\].
+
+Another challenge with the display of poems is the use of unique and irregular spacing at the beginning and within lines. This space is often manually coded using the HTML entity “&nbsp;”. To provide a more flexible means of markup, VPOD utilizes CSS classes indicating different widths of padding to the left of the required word or line given in em units \[[9](https://journal.code4lib.org/articles/#note9)\]. For example, .em1{padding-left:1em;}, .em2{padding-left:2em;}, etc. This provided a simple set of classes that could be easily applied by editors with different levels of experience with HTML/CSS to lay out the poems. Following the conventions allowed for quick adjustments when eyeballing the layout based on the original poem image, as an editor could try a “em4,” for example, realize that a bit more spacing was needed, and adjust the class to “em5.” Here’s an example of a printed poem using theses styles:
+
+![Figure 2](https://journal.code4lib.org/media/issue45/williamson/2.png)
+
+**Figure 2.** C.D. Roger Reeves’ poem “Against Its Own Ringing, as featured on Vandal Poem of the Day
+
+Below is the code that creates the effect:
+
+| 1  2  3  4  5  6  7  8 | `<``p``></``p``>`  `<``p` `class``=``"line"``>More than once I’ve asked a body to scatter</``p``>`  `<``p``></``p``>`  `<``p` `class``=``"line em6"``>And have received that scattering.</``p``>`  `<``p``></``p``>`  `<``p` `class``=``"line"``>More than once, a scar. More than once a scare-</``p``>`  `<``p``></``p``>`  `<``p` `class``=``"line em6"``>Crow watching the corn of another’s body</``p``>` |
+| --- | --- |
+
+Each break is a closed paragraph element. Each line is classed as a “line,” and any indented line is indented with the “em6” class, which assigns it a padding of “6em.”
+
+### Benefits of Using WordPress
+
+Over the four years VPOD has been running, we have had undergraduates, graduate students, faculty, and staff work on marking up and updating the poems within the WordPress site. These contributors’ familiarity with HTML and CSS has varied considerably. By establishing the conventions for layout and classes noted above, and providing training on the process, we were able to provide learning opportunities to collaborators looking to learn basic concepts of HTML/CSS. This was not a benefit we anticipated, but we now often use the site and the tasks of laying out poems within it as an HTML/CSS introduction for those unfamiliar with the languages. WordPress’s ability to define users and user roles also enabled this collaborative work, and the CMS’s GUI interface provided a user-friendly environment for these collaborators to learn these skills, check their edits, and then see the results of their work published online.
+
+In addition to allowing a means for collaboration and learning, WordPress’s innate ability via plugins to schedule the posts/poems publication and announce these publications with a tweet were clear benefits of working with the CMS. Once the poems were fully loaded into the WordPress instance, an administrator would use the [Drafts Scheduler](https://wordpress.org/plugins/drafts-scheduler/) plugin to schedule a poem to be published each weekday morning during the academic year. Each day somewhere between 6 and 7 AM Pacific time, a new poem would be automatically published on the site. At this time, the [WP to Twitter](https://wordpress.org/plugins/wp-to-twitter/) plugin would automatically send out a tweet announcing the new post. As tweets automatically include the poet’s name and Twitter handle (if available), this enabled attention and retweeting through the poets own networks and was one of the more successful promotional endeavors we used.
+
+The final benefit of WordPress resulted from an innate feature in all WordPress sites. The two plugins detailed above saved us a significant amount of time, as once the poems were scheduled to be published and tweeted, little other maintenance was required. Most years the majority of the work would be complete on the site for the full year by October or November, and the site and twitter presence would essentially run itself. This provided us time to, in the now canonical phrase of Stephen Ramsey, “mess around” with a variety of other uses for the poems, using WordPress’s built in XML export feature to pull out all the edited and marked up poems and associated content as structured data for use in other tools and features.
+
+## Poetry to the People Via KioskSlides and PoemBot Printers
+
+Although the grant outlined specific plans for traditional marketing activities, such as providing print promotional materials, planning events, and using the QR codes on posters across town to promote access to the VPOD site, new ideas and unexpected possibilities arose as we worked with the poems and collaborated with each other. At one point multiple members of the team shared an article about a short story printer in Grenoble, France \[[10](https://journal.code4lib.org/articles/#note10)\]. Williamson had previous experience using Raspberry Pi and mentioned that it was possible to create a DIY version \[[11](https://journal.code4lib.org/articles/#note11)\]. Suddenly our enthusiasm for the idea bloomed into a new avenue for VPOD outreach. By printing the daily poems in an ephemeral form, we could literally get poetry into the hands of our community via a mundane object of everyday life, thus using receipts to make a physical connection between people, poetry, and the VPOD website.
+
+To implement this idea we worked through two versions of a poetry printer, first as an add on to a library information display called kioskSlides, and second as a standalone mini-printer named poemBot.
+
+### KioskSlides
+
+When VPOD began, the University of Idaho Library’s first floor was closed for renovation and a large television welcomed visitors at the temporary entrance using a PowerPoint slide deck on a loop to display updates, news, and marketing. We saw an opportunity to integrate VPOD and create a more interactive display featuring a daily poem. However, several physical limitations constrained the project: 1) the display was run from an old computer; 2) the computer was offline; 3) the computer was locked with no admin access allowed, and 4) we had, at that point, no budget. Necessity, nevertheless, is the mother of invention (or minimal computing), and the kioskSlides project became a simple, pragmatic response to our initial limitations \[[12](https://journal.code4lib.org/articles/#note12)\].
+
+First, the display’s existing PowerPoint slide show was exported as images. Each image was added to a template HTML page that centers and contains it as a background to create a “slide” that is responsive to screen size. This set of HTML pages share a JavaScript file that advances the slides on a timer (i.e. loads the next page) following the order given as a variable. Williamson then recreated the look of the VPOD home page (normally dynamically generated by WordPress) in an offline static version. Since the static page can not query the online VPOD or a database, each poem is represented by a hidden div with an id of the date it should appear. JavaScript checks the current date and displays the appropriate poem of the day–or during breaks, displays a random poem from the archive. This HTML slide deck was loaded on to the display computer and set to run on Chrome browser in “kiosk mode” (instructions are available in the repository). This locks Chrome into full screen and hides the user interface, thus providing a display much like the original slide show. A mouse was added to the display computer to allow interaction from passers by, a click advances slides or prints a poem.
+
+To print poems, an old “point-of-sale” printer originally used for library loan receipts was rescued from the trash. Most librarians will be familiar with these printers which make quite a bit of noise–in this case attracting attention to poetry entering the world on paper. Since the computer had the correct printer drivers installed and Chrome browser was set with options “–kiosk-printing –disable-print-preview” to disable dialog inputs, simply adding onclick=”window.print()” turns the HTML slide into an interactive poem printer. The print output is handled by a media=”print” stylesheet (simply hiding the decorative elements of the page so the poem can print cleanly), and Chrome natively converts the HTML to a printable format reducing many of the potential difficulties. Adding this simple printer to the information display created an incentive for people to interact and pause at the slide show, getting more attention for VPOD as well as for general library marketing information.
+
+![Figure 3](https://journal.code4lib.org/media/issue45/williamson/3.jpg)
+
+**Figure 3.** Photograph of the KioskSlides poetry printer with promotional materials. ([enlarge](https://journal.code4lib.org/media/issue45/williamson/3_large.jpg))
+
+### PoemBot
+
+The second poetry printer was the poemBot project ([https://github.com/evanwill/poemBot](https://github.com/evanwill/poemBot)) which brings together a mini thermal receipt printer, Raspberry Pi, Python, and poetry in a sturdy wooden case to print poems wherever there is need. In addition to creating an interesting artifact to promote VPOD, this project was an opportunity to gain experience with physical computing to complement a new “makerspace” opening in the UI library. It delivers printed poems, but also acts as a teaching object starting conversations about microprocessors and programming, and demonstrating physical computing in action.
+
+PoemBot’s basic setup is based on numerous other projects that make use of [Raspberry Pi](https://www.raspberrypi.org/) and a cheap thermal printer \[[13](https://journal.code4lib.org/articles/#note13)\]. These projects, and the PoemBot, are enabled by the growing abundance of user-friendly devices, supportive distributors, and online tutorials that lower barriers to implementing custom hardware. PoemBot started from the parts of an “Adafruit IoT Printer” kit featuring a mini thermal receipt printer, a button with LED, and a Raspberry Pi 2 \[[14](https://journal.code4lib.org/articles/#note14)\]. Although our final assembly differs from the kit, we chose to keep our parts list very close, since the great documentation provided by Adafruit and easy availability of parts helps lower the barriers to reuse.
+
+![Figure 4](https://journal.code4lib.org/media/issue45/williamson/4.jpg)
+
+**Figure 4.** PoemBot opened to show Raspberry Pi 2 with “squid” wiring. ([enlarge](https://journal.code4lib.org/media/issue45/williamson/4_large.jpg))
+
+To connect the components, most other projects solder the circuit together or use a breadboard. However, since poemBot is a teaching object, Williamson wanted to streamline assembly, aiming to build in the flexibility to change things up, swap parts out, and experiment \[[15](https://journal.code4lib.org/articles/#note15)\]. Inspired by Pi guru Simon Monk’s “Squid” concept \[[16](https://journal.code4lib.org/articles/#note16)\], Williamson soldered jumper wires onto the component leads, so they can be easily plugged and unplugged in a modular fashion. To make connecting the squids to the Raspberry Pi easier, Williamson created a template marking the connection layout that fits on top of the GPIO pins, inspired by Simon Monk’s “Raspberry Leaf” concept \[[17](https://journal.code4lib.org/articles/#note17)\]. Rather than a laser-cut acrylic case, as found in the Adafruit kit, Williamson built a wooden case from 1” pine boards that provides a hand-made contrast to the electronic components, in addition to sturdy protection.
+
+![Figure 5](https://journal.code4lib.org/media/issue45/williamson/5.png)
+
+**Figure 5.** PoemBot with a freshly printed poem. The wooden box contains the Raspberry Pi and the receipt printer.([enlarge](https://journal.code4lib.org/media/issue45/williamson/5_large.png))
+
+### Poetry Data
+
+With a printer ready, poemBot needed poetry data. Luckily, VPOD’s clean markup and WordPress’s export feature made accessing poem text possible. The export XML was parsed and transformed using [OpenRefine](http://openrefine.org/), reshaping the poem posts into a CSV of metadata and text. The HTML markup of the poem text was stripped away, replacing the various “em” indent styles with an equal number of spaces and breaks with “\\n”. The poems were filtered by character count to remove longer poems, since the largest would require several feet of receipt paper to print. This data was exported from OpenRefine as a CSV, then converted to the obscure character encoding required by the printer using a text editor.
+
+The poem data is stitched together with the printer and Raspberry Pi using a Python script. Luckily, Adafruit provides a Python library to interact with the thermal printers it sells and excellent documentation of the library’s usage \[[18](https://journal.code4lib.org/articles/#note18)\]. Williamson adapted their example implementation to choose a random poem to print when the button is pressed, wrapping the lines with a hanging indent to mirror the original form of the poem (as much as is possible on a two inch wide piece of paper). Each of these actions are simplified by using Python standard libraries, as the poem CSV is loaded using “csv”:
+
+| 1  2 | `with ``open``(``'VPOD_22l_800char.csv'``) as csvPoems:`  `allPoems ``=` `list``(csv.reader(csvPoems, delimiter``=``','``))` |
+| --- | --- |
+
+selected using “random”:
+
+| 1 | `randPoem ``=` `random.choice(allPoems)` |
+| --- | --- |
+
+and wrapped with the appropriate hanging indent using “textwrap”:
+
+| 1  2  3  4 | `wrappedPoem ``=` `""`  `for` `line ``in` `randPoem[``3``].splitlines():`  `wrappedLine ``=` `textwrap.fill(line, width``=``32``, subsequent_indent``=``" "``)`  `wrappedPoem ``+``=` `wrappedLine ``+``"\n"` |
+| --- | --- |
+
+Keep in mind that Raspberry Pi does not have an internal clock, so the system does not know the date unless it connects to the internet. Originally, the poemBot connected to wifi, however, the complications of campus networks with high security and traveling made this become a barrier to use rather than a benefit. Instead, poemBot is simplified to function offline. To update the poem selection or add promotional messages to the print outs, Williamson removes the Raspberry Pi’s SD card, plugs it into a Linux computer, and directly edits the files–a considerably simpler and more pragmatic solution than using SSH to remotely log into the device.
+
+### PoemBot in Action
+
+PoemBot proved a successful hook for VPOD both on campus and at various conferences. We released the PoemBot officially at our inaugural reading event, which used funds from our Idaho Humanities Council grant to bring in the poet Roger Reeves for a reading and consultations with MFA students. For the event, the poemBot was programmed to print a random selection from the [nine poems featured on the VPOD site by Reeves](https://poetry.lib.uidaho.edu/index.php/category/roger-reeves/). The event was attended by over 80 people, and Reeves lived up to his reputation as a phenomenal reader. We were nervous to see what a poet thought about seeing his poems printed on receipts in this way, but these fears were soon calmed by Reeves’ enthusiasm. The audience members also appreciated the poemBot, with most members coming up to print a poem before or after the reading. Several students even had Reeves sign one of the poemBot-printed poems in lieu of his signing a book \[[19](https://journal.code4lib.org/articles/#note19)\]. PoemBot has visited several other readings since that time, starting conversations with poets and audiences.
+
+The poemBot also travelled, via luggage, to conferences in Los Angeles (Association of Writers and Writers Programs Conference, 2016) and Milwaukee (Digital Library Federation Forum, 2016). The authors were nervous about bringing the machine in their luggage, as the internal wires and Raspberry Pi bore a strong resemblance (presumably) to a bomb. Fears notwithstanding, the actual machine was well received at both conferences. Becker brought the printer to [a presentation at AWP](https://www.awpwriter.org/awp_conference/event_detail/4992) about Aubie’s Poem of the Day, after which it resided at the [*Fugue* Literary Journal](http://www.fuguejournal.com/) table, along with some of the VPOD marketing materials. At DLF, Becker and Williamson presented on the VPOD project and the PoemBot specifically and then set it up in the Pfister Hotel conference center hallway. Conference participants were intrigued by the box and impressed by the quality of the poems \[[20](https://journal.code4lib.org/articles/#note20)\]. The printing of these poems were often conversation starters about poetry and/or technology, as we were invited to talk about each, leading to discussions about Python, Raspberry Pi, poetry, or a combination of the bunch.
+
+Since then, poemBot has been deployed for a variety of special events on campus. We created simple instructions enabling anyone to set it up and start printing poems. The machine spent time on library circulation desks in honor of National Poetry Month \[[21](https://journal.code4lib.org/articles/#note21)\], visited the opening of a new digital humanities center \[[22](https://journal.code4lib.org/articles/#note22)\], and was repurposed to print contact information in our makerspace \[[23](https://journal.code4lib.org/articles/#note23)\]. The code and documentation on GitHub has led to connections with people across the country and the project has been adapted and used by students and faculty at other institutions \[[24](https://journal.code4lib.org/articles/#note24)\].
+
+## Future Data
+
+Starting from a fairly simple concept of creating a daily poetry website, VPOD grew into an opportunity to develop skills, think about poetry as data, and build new connections with people–moving away from marketing into programming/outreach. Focusing on curating the poems as clean, consistently marked up text enabled opportunities to interact with the poems in unanticipated ways. From poems displayed on huge screens to printed on tiny receipt paper, from text analysis to machine learning, this text dataset opens new possibilities, representing a rich corpus we are just beginning to explore \[[25](https://journal.code4lib.org/articles/#note25)\]. Furthermore, the project has led to unexpected connections between writers, librarians, students, faculty, and others, creating opportunities for learning, dialog, and reflection. As we end our fourth year of VPOD and plan for our fifth, we look forward to further exploring the text data, connecting with more people, and reading great poetry (daily).
+
+## About the Authors
+
+*Evan Peter Williamson* is the Digital Infrastructure Librarian (Assistant Professor) at the University of Idaho Library, working with Data & Digital Services to bring *cool* projects, *enlightening* workshops, and *innovative* services to life. Despite a background in Art History, Classical Studies, and Archives, he always manages to get involved in all things digital. His recent focus has been on data driven, minimal infrastructure web development, currently embodied in the [CollectionBuilder](https://collectionbuilder.github.io/) project.
+
+*Devin Becker* is the Director of the [Center for Digital Inquiry and Learning](https://cdil.lib.uidaho.edu/) (CDIL) and the Head of Data & Digital Services at the University of Idaho Library, where he directs and maintains the library’s digital initiatives program. Becker is also a writer. His first collection of poetry, *Shame | Shame*, was selected by David St. John as the winner of the thirteenth annual A. Poulin, Jr. Poetry Prize and was published by BOA Editions LTD in 2015. His most recent web project, [CTRL+Shift](http://ctrl-shift.org/), provides visualizations and analyses of series of interviews he conducted with prominent poets across the country.
+
+## References
+
+[1](https://journal.code4lib.org/articles/#ref1) Aubie’s Poem of the Day, [http://poetry.auburn.edu/](http://poetry.auburn.edu/)
+
+[2](https://journal.code4lib.org/articles/#ref2) This project and grant proved extremely important for future collaborations between the library and CLASS as it served as a model for the type of collaboration promoted by its digital humanities center, the Center for Digital Inquiry and Learning (CDIL), which, now in its third year of official operation, continues to enable collaborative projects between CLASS faculty and students and the library.
+
+[3](https://journal.code4lib.org/articles/#ref3) Aubie’s Poem of the Day shut down after Kuipers resigned her position at the University of Auburn to pursue other opportunities in the northwest. For years three and four, Becker worked with Persea Books and the journal *Poetry Northwest* to supply the poems for the site. Happily, the connection with *Poetry Northwest,* one of the more prominent poetry journals of the last 60 years, was enabled by Kuipers, who had become an editor at the journal after her move.
+
+[4](https://journal.code4lib.org/articles/#ref4) All the poems from the featured presses were previously published in books from the respective presses.
+
+[5](https://journal.code4lib.org/articles/#ref5) Xpdf Tools is a set of open source command line utilities useful to manipulating PDFs that has significantly faster performance than Acrobat, [http://www.xpdfreader.com/download.html](http://www.xpdfreader.com/download.html). It provided more consistent quality output than Acrobat’s built in export options.
+
+[6](https://journal.code4lib.org/articles/#ref6) Importing Content, WordPress Codex, [https://codex.wordpress.org/Importing\_Content](https://codex.wordpress.org/Importing_Content)
+
+[7](https://journal.code4lib.org/articles/#ref7) After the initial year, the XML import was replaced with a CSV import plugin allowing a spreadsheet provided by the editors of *Poetry Northwest* to generate draft posts that included the byline above the poem and links below the poem. The poem’s content, however, was not imported. This led to some confusion within the collaborative workflow and the accidental publication of two poems as “\[Poem Here\].” This was a rather embarrassing flub, after which we set up a better means for ensuring the poems were correctly prepared for publication.
+
+[8](https://journal.code4lib.org/articles/#ref8) For example: Teicher, Craig Morgan. “Fitting poetry to the screen: how one press is working to solve poetry’s e-book problems.” *Publishers Weekly*, 26 Mar. 2012, p. 36+. *Academic OneFile*, [http://ida.lib.uidaho.edu:2294/apps/doc/A284552394/AONE?u=mosc00780&sid=AONE&xid=6615b38a](http://ida.lib.uidaho.edu:2294/apps/doc/A284552394/AONE?u=mosc00780&sid=AONE&xid=6615b38a). Accessed 11 Jan. 2019.
+
+([https://www.publishersweekly.com/pw/by-topic/digital/content-and-e-books/article/51178-fitting-poetry-to-the-screen.html](https://www.publishersweekly.com/pw/by-topic/digital/content-and-e-books/article/51178-fitting-poetry-to-the-screen.html))
+
+[9](https://journal.code4lib.org/articles/#ref9) Although now often used in web design, em units follow an older printing convention of assigning indentations and spacing based on with width of the letter “M”.
+
+[10](https://journal.code4lib.org/articles/#ref10) Mariella Moon, “Short story vending machine promises old-school distractions”, Engadget, 2015-10-24, [https://www.engadget.com/2015/10/24/short-story-vending-machine-france/](https://www.engadget.com/2015/10/24/short-story-vending-machine-france/) (archived at: [https://perma.cc/BQD5-DWGG](https://perma.cc/BQD5-DWGG)). Since that time the Short Edition Short Story Dispenser has grown into a international business ( The Short Story Dispenser, Short Édition, [https://dispenser.short-edition.com](https://dispenser.short-edition.com/) (archived at: [https://perma.cc/MVH2-8FZ2](https://perma.cc/MVH2-8FZ2)) )
+
+[11](https://journal.code4lib.org/articles/#ref11) Colleagues at University of British Columbia SLAIS had recently created the “Readers Advisory Device” that printed book suggestions, [https://github.com/asistubc/RAD-device](https://github.com/asistubc/RAD-device)
+
+[12](https://journal.code4lib.org/articles/#ref12) Basic code template and concepts available in kioskSlides, [https://github.com/evanwill/kioskSlides](https://github.com/evanwill/kioskSlides)
+
+[13](https://journal.code4lib.org/articles/#ref13) For example, the Little Box of Geek, [http://geekgurldiaries.blogspot.com/2012/12/little-box-of-geek-project.html](http://geekgurldiaries.blogspot.com/2012/12/little-box-of-geek-project.html) (archived: [https://perma.cc/6TFB-CBGL](https://perma.cc/6TFB-CBGL) )
+
+[14](https://journal.code4lib.org/articles/#ref14) [https://learn.adafruit.com/pi-thermal-printer/overview](https://learn.adafruit.com/pi-thermal-printer/overview) (archived: [https://perma.cc/QD65-VT7N](https://perma.cc/QD65-VT7N) )
+
+[15](https://journal.code4lib.org/articles/#ref15) In fact, a similar simplified style of wiring the circuit was adopted by newer versions of the Adafruit kit in 2017.
+
+[16](https://journal.code4lib.org/articles/#ref16) Simon Monk, Squid, [https://github.com/simonmonk/squid](https://github.com/simonmonk/squid)
+
+[17](https://journal.code4lib.org/articles/#ref17) [http://www.doctormonk.com/2013/02/raspberry-pi-and-breadboard-raspberry.html](http://www.doctormonk.com/2013/02/raspberry-pi-and-breadboard-raspberry.html) (archived at: [https://perma.cc/95Y9-F6RX](https://perma.cc/95Y9-F6RX) )
+
+[18](https://journal.code4lib.org/articles/#ref18) This is one of the ways Adafruit lowers barriers to developing projects, since in the past this would involve tracking down obscure technical documentation from manufactures.
+
+[19](https://journal.code4lib.org/articles/#ref19) The books available sold out that night, so this did not prevent any purchasing of the book itself!
+
+[20](https://journal.code4lib.org/articles/#ref20) Some who printed out poems at the DLF conference have since remarked about how important printing and holding poems on the day of Trump’s election was to their well-being.
+
+[21](https://journal.code4lib.org/articles/#ref21) [https://www.poets.org/national-poetry-month/home](https://www.poets.org/national-poetry-month/home), poemBot is especially helpful to celebrate Poem In Your Pocket Day, [https://www.poets.org/national-poetry-month/poem-your-pocket-day](https://www.poets.org/national-poetry-month/poem-your-pocket-day)
+
+[22](https://journal.code4lib.org/articles/#ref22) Center for Digital Inquiry and Learning, [https://cdil.lib.uidaho.edu/](https://cdil.lib.uidaho.edu/)
+
+[23](https://journal.code4lib.org/articles/#ref23) Making, Innovating, and Learning Laboratory @ UIdaho Library, [https://mill.lib.uidaho.edu/](https://mill.lib.uidaho.edu/)
+
+[24](https://journal.code4lib.org/articles/#ref24) PoemBot has been used by students and librarians at [North Carolina State University](http://hyperrhiz.io/hyperrhiz18/kits/wust-bookbot-poet.html), [The College of Wooster](https://github.com/WoosterDH/poemBot-Scripts), [Swarthmore,](https://github.com/swat-ds/poemBot) and [Lewis & Clark College](https://perma.cc/W3N8-VJL3).
+
+[25](https://journal.code4lib.org/articles/#ref25) The clean text data we now have after 4 years of operating VPOD promises a number of possibilities to promote, have fun ([https://evanwill.github.io/\_drafts/notes/pi-py-poems.html](https://evanwill.github.io/_drafts/notes/pi-py-poems.html)), and analyze the VPOD corpus in new ways, including the potential to analyze the different poetry presses and the style of poetry they publish via textual analysis, some of which we’ve begun here: [https://uidaholib.github.io/poemchoice/](https://uidaholib.github.io/poemchoice/).

@@ -1,0 +1,86 @@
+---
+title: "How the WSLS-TV News Digitization Project Helped to Launch a Project Management Office"
+source: "https://journal.code4lib.org/articles/8652"
+author:
+  - "[[The Code4Lib Journal]]"
+published: 2014-01-17
+created: 2025-01-10
+description: "This article discusses how the WSLS-TV News Digitization Project at the University of Virginia Libraries was the catalyst for creating a more formalized project workflow and the eventual creation of a Project Management Office. The project revealed the need for better coordination between various groups in the library and more transparent processes. By creating well [...]"
+tags:
+  - "clippings"
+---
+# How the WSLS-TV News Digitization Project Helped to Launch a Project Management Office
+Ivey Glendon, Melinda Baumann
+
+This article discusses how the WSLS-TV News Digitization Project at the University of Virginia Libraries was the catalyst for creating a more formalized project workflow and the eventual creation of a Project Management Office. The project revealed the need for better coordination between various groups in the library and more transparent processes. By creating well documented policies and processes, the new project workflow clarified roles, improved communication, and created greater transparency. The new processes enabled staff to understand how decisions are made and resources allocated which allowed them to work more efficiently.
+
+## Introduction
+
+Since 2012, the University of Virginia (U.Va.) Library has invested heavily in two initiatives: providing access to some 13,000 film clips associated with the *WSLS-TV News Film Collection, 1951-1971*, and launching a Project Management Office in support of this and future projects.
+
+The complexity of the WSLS-TV project has been a catalyst for building a project management program at the University of Virginia Library. A new Project Management Office, currently housed in the Library IT department, is putting procedures into place that change the way projects are prioritized and how collections are made discoverable. This paper will discuss best practices for managing a multiple-department project team and lessons learned about creating robust project plans.
+
+## The WSLS-TV News Film Collection, 1951-1971
+
+In 2007, the WSLS-TV station in Roanoke, Virginia donated a large and comprehensive collection of news films and scripts of mid-20<sup>th</sup> century broadcasts to the U.Va. Library. The WSLS-TV collection consists of approximately 13,000 clips of 16mm film and over 18,000 pages of accompanying anchor scripts, and has the only known surviving local news reels from the civil rights era produced in Virginia. The content was unique and a good fit for the media collection, but after the donation was accepted it languished without a clear plan for processing and delivery.  While the Library had undertaken many successful digitization projects in past years, this large and complex project required considerable time and resources from multiple departments with their own priorities. In 2010, the Library’s Preservation Services unit took ownership of the project and received a $254,600 grant from the National Endowment for the Humanities (NEH) in support of the preservation and digitization of the film and the paper scripts.
+
+From 2010 to 2012 a small number of staff members, primarily from Preservation Services, worked with a vendor to digitize the collection as they generated the descriptive metadata in-house. Library IT and other departments worked on how to deliver a digital video collection through the Library’s online catalog, Virgo. Library leadership deemed it a priority to make the collection available, but progress was slow as the small team grappled with challenging issues:
+
+- **Collection organization**. There were three primary categories of content in the collection:  clips with matching scripts, clips without scripts, and scripts without clips. Each object required manual sorting to place it in one of these categories.
+- **Metadata**. The PBCore metadata standard was chosen as most appropriate for a public broadcast and moving image collection; however, because it was the Library’s first implementation of PBCore there was little familiarity with the standard.
+- **Access**. Copyrighted content was discovered embedded in the collection. Additionally, multiple vacancies in the Library’s User Experience team slowed decisions about the user interface.
+
+In late 2012, when it became clear that the processing, description, and access challenges threatened to overwhelm the project, a formal project team was formed and the Library’s metadata librarian was asked to serve as Project Manager (PM). Experts from five departments – Library IT, Metadata Management Services, Preservation Services, Digital Curation Services, and the Arts & Media group – were charged by the Library’s new Chief Technology Officer with making the collection’s content available online. The formality of charging a project team helped to focus the team on the common goal of moving the project forward.
+
+## Revised Goals and Principles
+
+Upon convening the project team in October 2012, the PM worked with stakeholders to fully assess the status of the collection, its metadata, and the amount of staff resources allocated to the project. The review revealed that the project was understaffed and far more complicated than originally thought. Consequently, several staff members from the Metadata Management Services unit were added to the project team to devise and execute workflows for sorting content, matching film clips to their scripts, and creating standardized metadata for the entire collection.
+
+In addition to convening the team for a full scan of project activity, the PM created a dedicated mailing list, a Confluence-based wiki for recording meeting notes and other documentation, and established regularly scheduled face-to-face check-in meetings with the project team. The regular meetings – initially viewed skeptically in a meeting-averse culture –proved critical to the success of a project with a large, complex collection and staff from numerous departments.   Scheduled face-to-face interaction with the whole team improved communication efficiency by eliminating the need for smaller sub-group meetings and also fostered accountability for decision-making and task implementation because all project members began working with the same set of information and expectations.
+
+The Data Architecture group, the working group that had responsibility for all new and existing metadata standards, was still in the process of forming at the start of the project and didn’t have a clear path for implementing new standards. How would this important content be made available in the online catalog when there was no existing mechanism for the delivery of video with PBCore metadata? How would the scripts be displayed in relation to the video clips? New problems emerged as the project team was addressing existing collection, metadata and access challenges.
+
+The Library still lacked a formal process by which scarce staff resources could be assigned to a project or collection, and not enough attention was paid to developing strong user requirements. What was needed was a process that took all expert opinion into consideration at the start of the project and widespread acknowledgement that prioritization sometimes necessitates that other projects must go on hold.
+
+## Project Management Office Informs New Workflow
+
+As the WSLS-TV project team labored to complete their charge, the consolidation of the Library’s IT departments under a newly-hired Library CTO provided an opportunity to rethink the workflows for projects similar to the WSLS-TV effort. The time was ripe to develop a more efficient and transparent process for vetting and prioritizing projects and allocating resources with support from a new Project Management Office (PMO).
+
+The WSLS experience has been the cornerstone of this new project proposal process insofar as it has exposed needs for robust project planning and significant institutional support (in the form of technical and human resources, project prioritization, and space for documentation) in ways that no other collection had before. We know that the WSLS-TV project, while complex, is not unique in its complexity and that future projects at the library will need similar support from units across the Library. The PMO, in response to the WSLS-TV project having exposed resource gaps in the organization, now leads a new workflow wherein staff proposing projects define desired needs and outcomes much earlier in the planning process. Each new project proposal requires a sponsor to provide some resources and a business process owner to provide early details to flesh out the proposal and to help develop user requirements. Projects require early assessment and planning, not “just-in-time” assessment and planning. Transparency makes the resource allocation process less mysterious. Any deadlines or other urgencies need to be stated up front. Finally, all proposals must link to at least one library strategic direction ([https://www.library.virginia.edu/assets/StrategicDirectionsSep2013.pdf](https://www.library.virginia.edu/assets/StrategicDirectionsSep2013.pdf)) to support its prioritization.
+
+The new U.Va. process involves over 50 people (or almost 25% of full-time staff) in the decisions to approve, inform, define, and prioritize projects. Earlier efforts to ask managers to prioritize were largely unsuccessful. Most felt they didn’t have either the technical expertise or enough information about the impact of projects to consider their merit or to rank them in relation to each other. But with a more robust and well-documented vetting process in place, staff from across the library are more willing to delve into the complex, granular proposal details and form opinions on what projects are truly priorities.
+
+Here’s how it works: Proposals are submitted on a web form that is sent to the PMO. The PMO assigns the proposal a tracking number and creates a wiki site for documentation and updates. The PMO then sends the proposal to one of three service teams representing the library’s major content delivery mechanisms: the online catalog (Virgo), the institutional repository (Libra), and the other critical web services such as the library home page and online exhibit Omeka installation. Recently a fourth service team was added to review projects that support business operations, grants, and external collaborations. Each service team oversees a portfolio of projects to completion. If it aligns with library strategies, the service team conditionally approves the proposal within two weeks. Service teams then send representatives to meet with working groups responsible for User Experience, Collections, Data Architecture, and Systems. These working groups have the expertise to flesh out proposals with resource requirements and to comment on potential project constraints, assumptions, and risks. The Collections group has the additional responsibility to consider the impact and value of the content on U.Va. scholarship.  The working groups have at least four weeks (concurrent) to review and comment.
+
+The newly-compiled proposal, when returned to the overseeing service team, is then deemed a project. The project is ready for prioritization against the other new projects approved that quarter and against projects already underway. Prioritization efforts are successful because the service teams are very familiar with the project details. Library leadership teams are also updated and provide some input on prioritized lists on a quarterly basis. After prioritization the PMO assigns a project manager and provides administrative support to the project manager and team.
+
+[![U.Va. Library Workflow: Proposal to Project](https://journal.code4lib.org/wp-content/uploads/2014/01/pmo-flow-linear-hr2.png)](https://journal.code4lib.org/wp-content/uploads/2014/01/pmo-flow-linear-hr2.png)
+
+U.Va. Library Workflow: Proposal to Project
+
+### Diagram legend
+
+- **Sponsor:** Usually a department head who conceives of a library-wide project and can provide some resources
+- **Bus. Proc. Owner**: Business Process Owner, usually the proposal author and champion of the project, is most knowledgeable about the requirements and desired outcomes
+- **PMO:** Project Management Office, six members of Library IT department who administer library projects with an IT component from inception to conclusion
+- **Lib-IT Mgmt:** staff reporting to the head of Library IT
+- **Service Teams**: groups with in-depth knowledge of major library content delivery systems and infrastructure that evaluate and approve project proposals and oversee projects to their completion
+- **Working Groups:** Groups with in-depth knowledge of systems, metadata, collections, or user experience
+- **Lib-Ops**: Library Operations group, a decision-making body responsible for translating the library’s strategic directions into user-centered services
+- **SLT:** Senior Leadership Team, a decision-making body comprised of University Librarian and other library leaders
+
+As of November 2013 there were over a dozen active projects that the Project Management Office has shepherded through the new proposal process. There are also several dozen other active projects and project teams that predate the new process but are benefiting from the improved prioritization method. Resources are being used carefully and effectively and library leaders see that more is getting done.
+
+The PMO is currently working with service teams, individuals, and library departments to identify staff interested in becoming project managers and to provide baseline training. Departments that intend to submit proposals in the future are particularly encouraged to allocate staff time to project management. Providing staff that are knowledgeable about a proposal and its desired outcomes will greatly help to put the project on track and keep it there. Over time, the intent is to build a community of skilled project managers willing to take on ambitious projects from across the library.
+
+##  Conclusion
+
+The WSLS-TV News Film Collection, 1951-1971 has been an exciting, complex and challenging collection for the Library. The first batch of several thousand clips and scripts became publicly available in August 2013, less than a year after the project team formed – proving that new collections to support research and scholarship can be adequately described and made accessible in a timely manner. The team now adds new content in two releases each month. The WSLS-TV project is on schedule to conclude in May 2014, thanks to good project management and the willingness of the project team to communicate continually and rethink long-standing workflows.
+
+Other institutions may also find that a more robust project workflow can help change organizational culture. The team model in place for the WSLS-TV project has demonstrated to library staff a need for centralization around projects, and the new PMO processes have added structure, clarified roles, and led to greater efficiency for the organization. The transparency created by the documented policies and processes allows library staff to understand how decisions are made and resources are allocated, enabling staff to create more effective proposals and feel confident that their proposals have been given adequate attention.
+
+At U.Va., the immediate goal remains to develop a process that is efficient and sensible by using the WSLS-TV project as a model. The larger, long-term goal is to build trust, to foster greater ownership of projects, and to support and celebrate their successful outcomes. As this new project workflow develops, so too will staff expertise and comfort in prioritizing disparate projects and initiatives. Further, participation from staff in all areas of the library is expected to foster greater understanding of and appreciation for interdependencies between departments and help to ensure that the decisions about how time and money are spent are made fairly.
+
+Ivey Glendon ([img7u@virginia.edu](https://journal.code4lib.org/articles/)) is a Metadata Librarian at the University of Virginia Library, where she consults with faculty, students and staff on metadata schema and controlled vocabularies, suggests tools for metadata creation and management, and provides project management support. Prior to joining U.Va. in 2011, she served as a digital conversion specialist for the National Digital Newspaper Program at the Library of Congress.
+
+Melinda Baumann ([baumann@virginia.edu](https://journal.code4lib.org/articles/)) is Librarian for Project and Service Management in the Library IT department at the University of Virginia, where she has worked since 1993. In addition to managing technology projects she has been instrumental in creating a new paradigm for project workflow being adopted by the University Library. Baumann has also worked as a reference librarian and a director of digital production.
