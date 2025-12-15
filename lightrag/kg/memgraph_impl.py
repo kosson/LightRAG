@@ -824,7 +824,7 @@ class MemgraphStorage(BaseGraphStorage):
             max_nodes = self.global_config.get("max_graph_nodes", 1000)
         else:
             # Limit max_nodes to not exceed global_config max_graph_nodes
-            max_nodes = min(max_nodes, self.global_config.get("max_graph_nodes", 1000))
+            max_nodes = min(max_nodes, self.global_config.get("max_graph_nodes", 100000))
 
         workspace_label = self._get_workspace_label()
         result = KnowledgeGraph()
