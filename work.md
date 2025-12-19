@@ -1712,3 +1712,48 @@ All data from health:
 Some possible advance towards Neo4j: https://neo4j.com/docs/operations-manual/current/tutorial/tutorial-clustering-docker/
 
 Just modify the .env seting `LIGHTRAG_GRAPH_STORAGE=Neo4JStorage` followed by `docker-compose restart lightrag`.
+
+
+In your .env file (lines 297-324), all storage configuration lines are commented out:
+
+```conf
+# LIGHTRAG_KV_STORAGE=JsonKVStorage  ← commented, using default
+# LIGHTRAG_GRAPH_STORAGE=Neo4JStorage  ← commented, not using Neo4j
+# LIGHTRAG_VECTOR_STORAGE=...  ← commented, using default
+```
+
+What is used:
+
+```txt
+💾 Storage Configuration:
+    ├─ KV Storage: JsonKVStorage
+    ├─ Vector Storage: NanoVectorDBStorage
+    ├─ Graph Storage: NetworkXStorage
+    ├─ Document Status Storage: JsonDocStatusStorage
+``` 
+
+The application falls back to defaults defined in config.py (lines 56-59):
+
+```python
+class DefaultRAGStorageConfig:
+    KV_STORAGE = "JsonKVStorage"  # ← local JSON files
+    VECTOR_STORAGE = "NanoVectorDBStorage"  # ← local JSON files
+    GRAPH_STORAGE = "NetworkXStorage"  # ← local GraphML file
+    DOC_STATUS_STORAGE = "JsonDocStatusStorage"  # ← local JSON files
+```
+
+
+Recommendation:
+You can safely stop all database services since they're consuming resources but not being used. To do this:
+
+```bash
+docker compose -f docker-compose.services.yml stop neo4j mongodb redis memgraph postgres
+```
+
+Or if you want to switch to using these services for production (better performance, scalability), uncomment the appropriate lines in .env and restart the lightrag container.
+
+Since you have 1GB+ of existing data and re-processing would take time, you have a few choices:
+
+Keep using JSON storage (it's working fine for your current scale)
+Migrate cache + re-index (migrate LLM cache with the tool to save API costs, then re-index documents)
+Full re-index (cleanest approach, but will take time and API costs)
