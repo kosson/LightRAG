@@ -1,5 +1,3 @@
-version: '3.9'
-
 # Compose file to run local DB/services used by LightRAG for development.
 # Each service maps container ports to host ports so they are reachable from the host.
 # Containers get an extra host entry so they can reach the host's Ollama daemon at
@@ -97,7 +95,7 @@ services:
       - "docker.host:172.17.0.1"
 
   postgres:
-    image: postgres:15
+    image: pgvector/pgvector:pg15
     container_name: lightrag_postgres
     environment:
       - POSTGRES_PASSWORD=postgres

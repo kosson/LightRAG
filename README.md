@@ -8,12 +8,35 @@ This project ued a Linux Mint machine with a Nvidia graphics card RTX 4060, 8Gb 
 
 ### Local installation
 
+This is only in case you want to have a taste. For a real work use Docker compose.
+
 > **💡 Using uv for Package Management**: This project uses [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management.
 > Install uv first: `curl -LsSf https://astral.sh/uv/install.sh | sh` (Unix/macOS) or `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows)
 >
 > **Note**: You can also use pip if you prefer, but uv is recommended for better performance and more reliable dependency management.
 >
 > **📦 Offline Deployment**: For offline or air-gapped environments, see the [Offline Deployment Guide](./docs/OfflineDeployment.md) for instructions on pre-installing all dependencies and cache files.
+
+### Install LightRAG Core
+
+* Install from source (Recommended)
+
+```bash
+cd LightRAG
+# Note: uv sync automatically creates a virtual environment in .venv/
+uv sync
+source .venv/bin/activate  # Activate the virtual environment (Linux/macOS)
+# Or on Windows: .venv\Scripts\activate
+
+# Or: pip install -e .
+```
+
+* Install from PyPI
+
+```bash
+uv pip install lightrag-hku
+# Or: pip install lightrag-hku
+```
 
 #### Install LightRAG Server
 
@@ -62,7 +85,7 @@ lightrag-server
 
 ### Launching the LightRAG Server with Docker Compose
 
-Clone the present repo. Then, in the root directory of the repo, run:
+Clone the present repo. Rename `env.example` in `.env`, and then, in the root directory of the repo, run:
 
 ```bash
 ./scripts/check_ollama_models.sh  # Optional: Check and pull required Ollama models
@@ -85,34 +108,33 @@ docker compose -f docker-compose.services.yml up -d
 or use the prepared script:
 
 ```bash
-./scripts/start_services.sh
+./scripts/start_services.sh up
+```
+
+This approach would prove to be more useful.
+
+Now, PostgreSQL was chosen as database and vector database, and Neo4J for knowledgfe graph storage. 
+
+After starting the containers it would be fit to check if Postgres is running fine: `docker compose -f docker-compose.services.yml ps --format json | jq -r '.[] | select(.Service == "postgres") | .State'`. Then check for `vector` extension with the command: `docker exec lightrag_postgres psql -U postgres -d lightrag -c "CREATE EXTENSION IF NOT EXISTS vector; SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';"`. You should get something similar to the fragment below:
+
+```txt
+CREATE EXTENSION
+ extname | extversion 
+---------+------------
+ vector  | 0.7.0
+```
+
+Check all is ok looking a bit in the logs:
+
+```bash
+docker logs lightrag_postgres --tail 50
+docker logs lightrag --tail 50
 ```
 
 Check for connectivity to Ollama service:
 
 ```bash
 ./scripts/test_ollama_connectivity.sh
-```
-
-### Install LightRAG Core
-
-* Install from source (Recommended)
-
-```bash
-cd LightRAG
-# Note: uv sync automatically creates a virtual environment in .venv/
-uv sync
-source .venv/bin/activate  # Activate the virtual environment (Linux/macOS)
-# Or on Windows: .venv\Scripts\activate
-
-# Or: pip install -e .
-```
-
-* Install from PyPI
-
-```bash
-uv pip install lightrag-hku
-# Or: pip install lightrag-hku
 ```
 
 ## Quick Start
