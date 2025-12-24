@@ -7,8 +7,8 @@ consistency and makes maintenance easier.
 """
 
 # Default values for server settings
-DEFAULT_WOKERS = 2
-DEFAULT_MAX_GRAPH_NODES = 100000
+DEFAULT_WOKERS = 5
+DEFAULT_MAX_GRAPH_NODES = 10000
 
 # Default values for extraction settings
 DEFAULT_SUMMARY_LANGUAGE = "English"  # Default language for document processing
