@@ -49,6 +49,7 @@ inputs/
 output/
 rag_storage/
 data/
+backups/
 
 # Evaluation results
 lightrag/evaluation/results/

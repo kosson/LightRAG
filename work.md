@@ -1757,3 +1757,163 @@ Since you have 1GB+ of existing data and re-processing would take time, you have
 Keep using JSON storage (it's working fine for your current scale)
 Migrate cache + re-index (migrate LLM cache with the tool to save API costs, then re-index documents)
 Full re-index (cleanest approach, but will take time and API costs)
+
+## Data backup
+
+I've created a comprehensive backup system for your LightRAG PostgreSQL and all other volumes. Here's what you now have:
+
+The following scripts were created:
+
+Main Backup Scripts:
+
+- quick_backup.sh - One-click full backup (recommended)
+- backup_all_volumes.sh - Complete system backup
+- backup_postgres.sh - PostgreSQL-only backup
+- restore_all_volumes.sh - Restore complete system
+- restore_postgres.sh - Restore PostgreSQL only
+- backup_info.sh - View backup status
+
+Documentation:
+
+- BackupGuide.md - Complete guide with all details
+- BACKUP_QUICKREF.md - Quick reference card
+
+### How to create the backups
+
+Create Your First Backup: `./quick_backup.sh`.
+This creates a portable .tar.gz file containing:
+
+✅ PostgreSQL (using pg_dump)
+✅ Neo4j
+✅ MongoDB
+✅ Redis
+✅ Memgraph
+✅ RAG storage data
+✅ Input files
+✅ Configuration files
+
+View Backup Status: `./scripts/backup_info.sh`.
+
+Restore a Backup: `./scripts/restore_all_volumes.sh lightrag_full_backup_YYYYMMDD_HHMMSS`.
+
+### Key Features
+
+✅ No Docker plugins needed - Uses native pg_dump and mongodump
+✅ Fully portable - Single file can be moved between servers
+✅ Automated retention - Keeps last 5 full backups automatically
+✅ Online backups - No downtime required
+✅ Compressed - All backups are gzip compressed
+✅ Verified - Integrity checks after backup
+✅ Self-documenting - Each backup includes manifest
+
+📁 Where Backups Are Stored
+
+```txt
+backups/
+├── lightrag_full_backup_YYYYMMDD_HHMMSS.tar.gz
+├── lightrag_full_backup_YYYYMMDD_HHMMSS.tar.gz
+└── postgres/
+    ├── lightrag_postgres_YYYYMMDD_HHMMSS.sql.gz
+    └── lightrag_postgres_YYYYMMDD_HHMMSS.sql.gz
+```
+
+### Portability & Migration
+
+To move your entire LightRAG installation to another server:
+
+```bash
+# On current server
+./quick_backup.sh
+scp backups/lightrag_full_backup_*.tar.gz user@newserver:/tmp/
+
+# On new server
+cd LightRAG
+mv /tmp/lightrag_full_backup_*.tar.gz backups/
+./scripts/restore_all_volumes.sh lightrag_full_backup_YYYYMMDD_HHMMSS
+docker-compose up -d
+```
+
+### Automated Backups
+
+```bash
+crontab -e
+# Add this line:
+0 2 * * * cd /media/nicolaie/beckie21/LIGHT.RAG/LightRAG && ./quick_backup.sh
+```
+
+Create your first backup now: `./quick_backup.sh`.
+
+Set up automated daily backups (see cron example above)
+Consider cloud sync for offsite backups (examples in BackupGuide.md)
+Test a restore in 30 days to verify everything works
+
+All backup files are already excluded from Git (added to .gitignore), so your backups won't accidentally get committed.
+
+### After backup is done
+
+Running: `./scripts/backup_info.sh` you get something similar with the following:
+
+```bash
+╔════════════════════════════════════════════════╗
+║  LightRAG Backup Information & Verification    ║
+╚════════════════════════════════════════════════╝
+
+📦 Full System Backups
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ./backups/lightrag_full_backup_20251226_135852.tar.gz (1,4G) - Dec 26 14:01
+
+  Total size: 1,4G
+
+🐘 PostgreSQL Backups
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  No PostgreSQL backups found
+
+💾 Backup Storage Usage
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Total backup directory: 1,4G
+  Available on disk: 1,2T (30% used)
+
+🐋 Docker Services Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lightrag_mongo: Up 45 hours
+lightrag_postgres: Up 45 hours
+lightrag_memgraph: Up 45 hours
+lightrag_redis: Up 45 hours
+lightrag_neo4j: Up 45 hours
+
+📋 Latest Full Backup Details
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  File: lightrag_full_backup_20251226_135852.tar.gz
+  Size: 1,4G
+  Date: 2025-12-26 14:01:41
+
+  Backup Contents:
+  Contents:
+  ---------
+  ./backups/lightrag_full_backup_20251226_135852/app_data/inputs.tar.gz 15M
+  ./backups/lightrag_full_backup_20251226_135852/app_data/rag_storage.tar.gz 561M
+  ./backups/lightrag_full_backup_20251226_135852/memgraph/memgraph_data.tar.gz 464K
+  ./backups/lightrag_full_backup_20251226_135852/mongodb/mongo_backup.tar.gz 441
+  ./backups/lightrag_full_backup_20251226_135852/neo4j/neo4j_data.tar.gz 91M
+  ./backups/lightrag_full_backup_20251226_135852/postgres/lightrag.sql.gz 677M
+  ./backups/lightrag_full_backup_20251226_135852/redis/redis_data.tar.gz 229
+  
+  Services Status at Backup Time:
+  --------------------------------
+  NAMES               STATUS
+  lightrag_mongo      Up 45 hours
+  lightrag_postgres   Up 45 hours
+
+💡 Recommendations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚠  Only 1 backup found - consider keeping at least 2-3 recent backups
+  ⚠  Few PostgreSQL backups - consider more frequent PG backups
+  ✓  Latest backup is less than 1 day old
+
+╔════════════════════════════════════════════════╗
+║  Quick Commands                                ║
+╚════════════════════════════════════════════════╝
+  Create backup:  ./quick_backup.sh
+  Restore backup: ./scripts/restore_all_volumes.sh <backup_name>
+  Full docs:      cat docs/BackupGuide.md
+```
