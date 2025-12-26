@@ -2,7 +2,7 @@
 
 This repo is using LightRAG, an original Retrieval-Augmented Generation (RAG) framework developed by the LightRAG Team at HKU DS Lab. The original repo: https://github.com/HKUDS/LightRAG. The original files were used and modified according to the needs of this project. All the credits go to the original authors.
 
-This project ued a Linux Mint machine with a Nvidia graphics card RTX 4060, 8Gb VRAM. Mind that there are some issues that had to be solved by tweeking, and tinckering with the code. Please refer to the `work.md` file for more details about the issues and how were solved. The degugging and adaptations were made using Claude Sonnet 4.5 via VSCode extension.
+This project was developed and is used on a Linux Mint machine with a Nvidia graphics card RTX 4060, 8Gb VRAM. Mind that there are some issues that had to be solved by tweeking, and tinkering with the code. Please refer to the `work.md` file for more details about the issues fixed, and how were solved. The debugging and adaptations were made using Claude Sonnet 4.5 via VSCode extension.
 
 ## Installation
 
