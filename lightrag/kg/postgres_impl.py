@@ -2961,6 +2961,8 @@ class PGVectorStorage(BaseVectorStorage):
         embeddings_list = await asyncio.gather(*embedding_tasks)
 
         embeddings = np.concatenate(embeddings_list)
+        # Sanitize embeddings: replace NaN values with 0.0 to prevent JSON serialization errors
+        embeddings = np.nan_to_num(embeddings, nan=0.0, posinf=1.0, neginf=-1.0)
         for i, d in enumerate(list_data):
             d["__vector__"] = embeddings[i]
 

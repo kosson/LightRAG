@@ -8,6 +8,7 @@ This project was developed and is used on a Linux Mint machine with a Nvidia gra
 
 ### Local installation
 
+You need to have Ollama installed and `qwen2.5-coder:7b`, `bge-m3:latest` models downloaded.
 This is only in case you want to have a taste. For a real work use Docker compose.
 
 > **💡 Using uv for Package Management**: This project uses [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management.

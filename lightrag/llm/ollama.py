@@ -9,6 +9,8 @@ if not pm.is_installed("ollama"):
     pm.install("ollama")
 
 import ollama
+import json
+import httpx
 
 from tenacity import (
     retry,
@@ -221,10 +223,31 @@ async def ollama_embed(
     ollama_client = ollama.AsyncClient(host=host, timeout=timeout, headers=headers)
     try:
         options = kwargs.pop("options", {})
-        data = await ollama_client.embed(
-            model=embed_model, input=texts, options=options
-        )
-        return np.array(data["embeddings"])
+        
+        # Use raw HTTP request to handle NaN values in JSON response
+        # The ollama client's JSON parser fails on NaN values
+        base_url = host if host else "http://localhost:11434"
+        url = f"{base_url}/api/embed"
+        
+        payload = {
+            "model": embed_model,
+            "input": texts,
+        }
+        if options:
+            payload["options"] = options
+        
+        async with httpx.AsyncClient(timeout=timeout if timeout else 300.0) as client:
+            response = await client.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            
+            # Replace NaN in the JSON response text before parsing
+            response_text = response.text.replace(": NaN", ": 0.0").replace(":NaN", ":0.0")
+            data = json.loads(response_text)
+        
+        # Sanitize any remaining NaN values in the embeddings array
+        embeddings = np.array(data["embeddings"])
+        embeddings = np.nan_to_num(embeddings, nan=0.0, posinf=1.0, neginf=-1.0)
+        return embeddings
     except Exception as e:
         logger.error(f"Error in ollama_embed: {str(e)}")
         try:

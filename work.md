@@ -1917,3 +1917,252 @@ lightrag_neo4j: Up 45 hours
   Restore backup: ./scripts/restore_all_volumes.sh <backup_name>
   Full docs:      cat docs/BackupGuide.md
 ```
+
+## Fixing issue with a NaN value 
+
+```bash
+Error processing entity `Streaming Rights`: VDB entity_upsert failed for Streaming Rights after 3 attempts: failed to encode response: json: unsupported value: NaN (status code: 500)
+Traceback (most recent call last):
+  File "/app/lightrag/utils.py", line 102, in safe_vdb_operation_with_exception
+    await operation()
+  File "/app/lightrag/kg/postgres_impl.py", line 2298, in upsert
+    embeddings_list = await asyncio.gather(*embedding_tasks)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/lightrag/utils.py", line 847, in wait_func
+    return await future
+           ^^^^^^^^^^^^
+  File "/app/lightrag/utils.py", line 551, in worker
+    result = await asyncio.wait_for(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/app/lightrag/utils.py", line 358, in __call__
+    return await self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/lightrag/api/lightrag_server.py", line 625, in optimized_embedding_function
+    return await ollama_embed(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/lightrag/llm/ollama.py", line 173, in ollama_embed
+    raise e
+  File "/app/lightrag/llm/ollama.py", line 160, in ollama_embed
+    data = await ollama_client.embed(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/ollama/_client.py", line 979, in embed
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/ollama/_client.py", line 751, in _request
+    return cls(**(await self._request_raw(*args, **kwargs)).json())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/ollama/_client.py", line 695, in _request_raw
+    raise ResponseError(e.response.text, e.response.status_code) from None
+ollama._types.ResponseError: failed to encode response: json: unsupported value: NaN (status code: 500)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/lightrag/operate.py", line 2471, in _locked_process_entity_name
+    entity_data = await _merge_nodes_then_upsert(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/lightrag/operate.py", line 1833, in _merge_nodes_then_upsert
+    await safe_vdb_operation_with_exception(
+  File "/app/lightrag/utils.py", line 108, in safe_vdb_operation_with_exception
+    raise Exception(error_msg) from e
+Exception: VDB entity_upsert failed for Streaming Rights after 3 attempts: failed to encode response: json: unsupported value: NaN (status code: 500)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/lightrag/lightrag.py", line 1921, in process_document
+    await merge_nodes_and_edges(
+  File "/app/lightrag/operate.py", line 2546, in merge_nodes_and_edges
+    raise first_exception
+  File "/app/lightrag/operate.py", line 2527, in merge_nodes_and_edges
+    result = task.result()
+             ^^^^^^^^^^^^^
+  File "/app/lightrag/operate.py", line 2507, in _locked_process_entity_name
+    raise prefixed_exception from e
+Exception: `Streaming Rights`: VDB entity_upsert failed for Streaming Rights after 3 attempts: failed to encode response: json: unsupported value: NaN (status code: 500)
+```
+
+When processing entities like "Streaming Rights", Ollama's embedding model was returning embeddings with NaN (Not-a-Number) values. These NaN values couldn't be serialized to JSON or stored in PostgreSQL's pgvector, causing the error:
+
+```text
+failed to encode response: json: unsupported value: NaN (status code: 500)
+```
+
+### The Root Cause
+The error occurs in postgres_impl.py:2963 where embeddings are gathered and stored. If any NaN values slip through from the embedding model, pgvector fails to encode them.
+
+The Fix
+I added NaN sanitization using NumPy's nan_to_num() function right after embeddings are concatenated (line 2963-2964):
+
+```python
+embeddings = np.concatenate(embeddings_list)
+# Sanitize embeddings: replace NaN values with 0.0 to prevent JSON serialization errors
+embeddings = np.nan_to_num(embeddings, nan=0.0, posinf=1.0, neginf=-1.0)
+```
+
+This converts:
+
+NaN values → 0.0 (safe neutral vector)
+Infinity values → ±1.0 (bounded)
+The fix ensures embeddings are always valid JSON-serializable numbers that pgvector can store properly, while maintaining vector semantics.
+
+I've also created a detailed explanation document at NAN_FIX_EXPLANATION.md with the complete analysis and implementation details.
+
+The error occurred in the following sequence:
+
+1. **Embedding Generation**: When `ollama_embed()` in `lightrag/llm/ollama.py` calls the Ollama API to generate embeddings, the response could contain NaN values (likely due to edge cases in the Ollama model's output or incomplete responses).
+2. **Vector Storage**: The embeddings are stored in PostgreSQL using the pgvector extension (a vector type for PostgreSQL). pgvector, like PostgreSQL's native JSON type, doesn't support NaN values for serialization.
+3. **JSON Encoding Failure**: When the system attempts to store or serialize these embeddings for the vector database, the JSON encoder fails because NaN values are not valid JSON according to the JSON specification.
+
+### Error Stack Trace Analysis
+
+- **Location**: `lightrag/kg/postgres_impl.py`, line 2961-2965 in the `VectorStorageImpl.upsert()` method
+- **Key Step**: After `embeddings_list = await asyncio.gather(*embedding_tasks)`, the embeddings are concatenated and assigned to data items
+- **Issue**: If embeddings contain NaN, they fail when pgvector tries to encode them
+
+## Solution
+
+The fix adds **NaN sanitization** immediately after embeddings are gathered and concatenated, using NumPy's built-in `nan_to_num()` function.
+
+### Implementation
+
+In `/mnt/beckie2/LIGHT.RAG/LightRAG/lightrag/kg/postgres_impl.py` (around line 2963-2964):
+
+```python
+embeddings = np.concatenate(embeddings_list)
+# Sanitize embeddings: replace NaN values with 0.0 to prevent JSON serialization errors
+embeddings = np.nan_to_num(embeddings, nan=0.0, posinf=1.0, neginf=-1.0)
+for i, d in enumerate(list_data):
+    d["__vector__"] = embeddings[i]
+```
+
+### What the Fix Does
+
+The `np.nan_to_num()` function:
+- **NaN values** → Replaced with `0.0`
+- **Positive infinity** → Replaced with `1.0`
+- **Negative infinity** → Replaced with `-1.0`
+- **Other values** → Left unchanged
+
+This ensures that:
+1. All embeddings are valid floating-point numbers
+2. The vectors can be properly serialized and stored in pgvector
+3. The system continues processing without errors
+4. The embeddings remain semantically meaningful (zero is a neutral value in embedding space)
+
+## Testing
+
+To verify the fix works:
+
+1. Run the application with the problematic entity name or document that previously caused NaN errors
+2. Monitor the logs to ensure entities are successfully processed
+3. Verify that vector searches work correctly with the sanitized embeddings
+
+## Alternative Approaches Considered
+
+1. **Replacing NaN with mean/median**: More complex, no significant benefit
+2. **Filtering out NaN embeddings**: Loses data
+3. **Fixing the Ollama output**: Would require changes to the embedding model itself
+4. **Converting to float32**: Doesn't solve the NaN problem
+
+The chosen approach (NaN → 0.0) is:
+- Simple and reliable
+- Maintains vector count and structure
+- Doesn't introduce unnecessary complexity
+- Handles edge cases gracefully
+
+## Files Modified
+
+- `lightrag/kg/postgres_impl.py`: Added NaN sanitization in `VectorStorageImpl.upsert()` method (line ~2964)
+
+## Notes
+
+- This is a defensive fix that handles unexpected NaN values from any embedding provider
+- The fix is applied at the database layer, so it works regardless of where NaN values originate
+- No changes to the API or user-facing functionality
+
+
+## Preping a few mods to the Docker Compose file
+
+Check the volume
+
+```bash
+docker volume inspect lightrag_postgres_data
+[
+    {
+        "CreatedAt": "2025-12-20T17:20:21+02:00",
+        "Driver": "local",
+        "Labels": {
+            "com.docker.compose.config-hash": "c725cb6ee202f920090ffede27e23f28c82683dfc64cf7ca0c81f90d37efc869",
+            "com.docker.compose.project": "lightrag",
+            "com.docker.compose.version": "5.0.0",
+            "com.docker.compose.volume": "postgres_data"
+        },
+        "Mountpoint": "/var/lib/docker/volumes/lightrag_postgres_data/_data",
+        "Name": "lightrag_postgres_data",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+```
+
+Rebuilding the container so that it picks up any mod without rebuilding. Now, now. Adding `- ./lightrag:/app/lightrag` to the `docker-compose.services.yaml`.
+Then rebuild the container:
+
+```bash
+docker compose -f docker-compose.services.yml build lightrag
+```
+
+A migration followed:
+
+```bash
+docker compose -f docker-compose.services.yml logs lightrag | grep -A2 -B2 "legacy table\|Migrating data"
+lightrag  | INFO: Creating HNSW index idx_lightrag_vdb_relation_bge_m3_latest_1024d_hnsw_cosine on table LIGHTRAG_VDB_RELATION_bge_m3_latest_1024d
+lightrag  | INFO: Successfully created vector index idx_lightrag_vdb_relation_bge_m3_latest_1024d_hnsw_cosine on table LIGHTRAG_VDB_RELATION_bge_m3_latest_1024d
+lightrag  | INFO: PostgreSQL: Found legacy table 'LIGHTRAG_VDB_RELATION' with 57908 records for workspace 'default'.
+lightrag  | INFO: PostgreSQL: Migrating data from legacy table 'LIGHTRAG_VDB_RELATION' to new table 'LIGHTRAG_VDB_RELATION_bge_m3_latest_1024d'
+lightrag  | INFO: PostgreSQL: 500/57908 records migrated for workspace 'default'
+lightrag  | INFO: PostgreSQL: 1000/57908 records migrated for workspace 'default'
+nicolaie@bigrig:/mnt/beckie2/LIGHT.RAG/LightRAG$  docker compose -f docker-compose.services.yml logs lightrag 2>&1 | grep "legacy"
+lightrag  | WARNING: PostgreSQL: Both new and legacy collection have data. 68529 records in LIGHTRAG_VDB_ENTITY require manual deletion after migration verification.
+lightrag  | INFO: PostgreSQL: Found legacy table 'LIGHTRAG_VDB_RELATION' with 57908 records for workspace 'default'.
+lightrag  | INFO: PostgreSQL: Migrating data from legacy table 'LIGHTRAG_VDB_RELATION' to new table 'LIGHTRAG_VDB_RELATION_bge_m3_latest_1024d'
+```
+
+The migration is happening because LightRAG changed its table naming scheme:
+
+Old format: LIGHTRAG_VDB_ENTITY, LIGHTRAG_VDB_RELATION
+New format: LIGHTRAG_VDB_ENTITY_bge_m3_latest_1024d, LIGHTRAG_VDB_RELATION_bge_m3_latest_1024d
+
+The new naming includes the embedding model name and dimensions. This allows:
+
+Supporting multiple embedding models in the same database
+Preventing conflicts when switching models
+Better tracking of which embeddings are used
+When the container started, it detected your old tables and is automatically migrating all 68,529 entity records and 57,908 relationship records to the new schema. This is a one-time migration that happens during the first startup after the rebuild.
+
+The migration is safe - your original data remains in the old tables (which you can manually delete later after verifying everything works).
+
+```bash
+docker compose -f docker-compose.services.yml logs lightrag -f 2>&1 | grep -E "(Application startup complete|Uvicorn running|migration complete|57908/57908)" --line-buffered
+```
+
+After the migration is done, the app starts.
+
+Quick succession to rebuilding and restarting lightrag:
+
+```bash
+docker compose -f docker-compose.services.yml stop lightrag && docker compose -f docker-compose.services.yml rm -f lightrag && docker compose -f docker-compose.services.yml up -d lightrag
+```
+
+Follows another fix for the issue with Ollama not handling JSONs with NaN values.
+
+The key improvements in the fix:
+
+Bypassed the Ollama client's JSON parser that fails on NaN
+Used httpx for direct HTTP calls to the Ollama API
+Replace NaN in raw JSON text before parsing (: NaN → : 0.0)
+Apply numpy sanitization on the parsed embeddings array
