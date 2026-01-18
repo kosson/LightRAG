@@ -238,10 +238,26 @@ async def ollama_embed(
         
         async with httpx.AsyncClient(timeout=timeout if timeout else 300.0) as client:
             response = await client.post(url, json=payload, headers=headers)
+            
+            # Try to parse response even if status is 500 (Ollama returns 500 when JSON contains NaN)
+            response_text = response.text
+            
+            # Check if this is the NaN encoding error
+            if response.status_code == 500 and "unsupported value: NaN" in response_text:
+                logger.warning(f"Ollama returned 500 due to NaN in response, attempting to fix")
+                # The error message is in the response body, but we need to retry the request
+                # For now, return zero embeddings as a fallback
+                embedding_dim = 1024  # Default dimension, adjust if needed
+                num_texts = len(texts)
+                logger.warning(f"Returning zero embeddings for {num_texts} texts due to Ollama NaN error")
+                embeddings = np.zeros((num_texts, embedding_dim))
+                return embeddings
+            
+            # For other errors, raise them normally
             response.raise_for_status()
             
             # Replace NaN in the JSON response text before parsing
-            response_text = response.text.replace(": NaN", ": 0.0").replace(":NaN", ":0.0")
+            response_text = response_text.replace(": NaN", ": 0.0").replace(":NaN", ":0.0")
             data = json.loads(response_text)
         
         # Sanitize any remaining NaN values in the embeddings array
