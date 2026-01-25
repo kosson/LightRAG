@@ -2166,3 +2166,44 @@ Bypassed the Ollama client's JSON parser that fails on NaN
 Used httpx for direct HTTP calls to the Ollama API
 Replace NaN in raw JSON text before parsing (: NaN → : 0.0)
 Apply numpy sanitization on the parsed embeddings array
+
+## node.js app development
+
+### naive vs local
+
+Key Differences:
+
+#### Local Mode Results:
+Found 25 references
+Generated a comprehensive definition of "digital curation"
+References include more conceptually related documents (Museum Informatics, Digital Humanities, Archives)
+Uses entity/relationship knowledge graph to find semantically related content
+
+#### Naive Mode Results (from earlier):
+Found 22 references
+Retrieved documents that actually contain the exact phrase "digital curation"
+References #5, #6, #7 have "digital curation" in their filenames:
+- "The Legal Environment of Digital Curation..."
+- "Digital Libraries for Experimental Data Capturing Process through Sheer Curation"
+- "DMP Online A Demonstration of the Digital Curation Centre's Web-Based Tool..."
+
+Answer: It Depends on Your Goal
+
+### Use --mode naive if you want to:
+
+✅ Find files that literally contain the term "digital curation"
+✅ Get exact text matches
+✅ See which specific documents mention the phrase
+
+Best for: "Which files contain X?"
+
+### Use --mode local if you want to:
+
+✅ Understand the concept of digital curation broadly
+✅ Find related topics and conceptually similar content
+✅ Explore the knowledge graph around the entity
+
+Best for: "Tell me about X"
+
+For your original question "Give me all the articles where 'digital curation' appears", naive mode is better because you want actual occurrences, not conceptual relationships.
+

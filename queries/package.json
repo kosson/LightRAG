@@ -1,0 +1,17 @@
+{
+  "name": "lightrag-query-client",
+  "version": "1.0.0",
+  "description": "Simple Node.js client for querying local LightRAG knowledgebase",
+  "main": "query.js",
+  "type": "module",
+  "scripts": {
+    "query": "node query.js",
+    "interactive": "node interactive.js"
+  },
+  "keywords": ["lightrag", "query", "rag"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.5"
+  }
+}
